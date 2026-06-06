@@ -14,7 +14,8 @@
     "android": {
       "adaptiveIcon": {
         "backgroundColor": "#060608"
-      }
+      },
+      "package": "com.drpsycho.forzajdmtelemetry"
     },
     "plugins": [
       "expo-font",
@@ -25,6 +26,11 @@
         }
       ],
       "expo-asset"
-    ]
+    ],
+    "extra": {
+      "eas": {
+        "projectId": "d2b9ff26-6f33-45fa-80a8-bdaa5825c968"
+      }
+    }
   }
 }

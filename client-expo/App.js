@@ -16,7 +16,9 @@ import {
   TouchableOpacity,
   StatusBar,
   Dimensions,
+  Platform,
 } from 'react-native';
+import * as NavigationBar from 'expo-navigation-bar';
 import Animated, {
   useSharedValue,
   useAnimatedStyle,
@@ -118,6 +120,14 @@ export default function App() {
   const [udpPort, setUdpPort] = useState('5300');
   const socketRef = useRef(null);
   const [screenDims, setScreenDims] = useState(Dimensions.get('window'));
+
+  // Hide Android navigation bar for true full-screen immersive mode
+  useEffect(() => {
+    if (Platform.OS === 'android') {
+      NavigationBar.setVisibilityAsync('hidden');
+      NavigationBar.setBehaviorAsync('overlay-swipe');
+    }
+  }, []);
 
   // Listen for dimension changes (responsive)
   useEffect(() => {
