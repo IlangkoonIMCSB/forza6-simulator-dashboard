@@ -1,0 +1,13 @@
+{
+  "name": "forza-telemetry-server",
+  "version": "1.0.0",
+  "description": "UDP-to-WebSocket bridge for Forza Motorsport 6 telemetry",
+  "main": "index.js",
+  "scripts": {
+    "start": "node index.js",
+    "dev": "node index.js"
+  },
+  "dependencies": {
+    "socket.io": "^4.7.4"
+  }
+}

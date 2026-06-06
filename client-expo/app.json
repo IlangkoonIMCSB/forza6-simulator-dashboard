@@ -1,0 +1,30 @@
+{
+  "expo": {
+    "name": "Forza JDM Telemetry",
+    "slug": "forza-jdm-telemetry",
+    "version": "1.0.0",
+    "orientation": "landscape",
+    "userInterfaceStyle": "dark",
+    "splash": {
+      "backgroundColor": "#060608"
+    },
+    "assetBundlePatterns": [
+      "**/*"
+    ],
+    "android": {
+      "adaptiveIcon": {
+        "backgroundColor": "#060608"
+      }
+    },
+    "plugins": [
+      "expo-font",
+      [
+        "expo-screen-orientation",
+        {
+          "initialOrientation": "LANDSCAPE"
+        }
+      ],
+      "expo-asset"
+    ]
+  }
+}
