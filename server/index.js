@@ -162,7 +162,12 @@ function showHelp() {
 const { udpPort: UDP_PORT, wsPort: WS_PORT } = parseArgs();
 
 // ─── HTTP + WebSocket Server ─────────────────────────
-const httpServer = http.createServer();
+const httpServer = http.createServer((req, res) => {
+  if (req.method === 'GET' && req.url === '/') {
+    res.writeHead(200, { 'Content-Type': 'text/plain' });
+    res.end('Forza Telemetry Server is Running!');
+  }
+});
 const io = new Server(httpServer, {
   cors: { origin: '*' }
 });
@@ -190,6 +195,10 @@ function parsePacket(buf) {
 
   const isRaceOn = buf.readInt32LE(0);
   if (isRaceOn === 0) return null; // Not in race
+
+  // V2 format (FH4/FH5/FM7 Dash) introduces a 12-byte shift after offset 232
+  const isV2 = buf.length >= 323;
+  const v2Offset = isV2 ? 12 : 0;
 
   return {
     isRaceOn,
@@ -283,55 +292,57 @@ function parsePacket(buf) {
     drivetrainType:   buf.readInt32LE(224),
     numCylinders:     buf.readInt32LE(228),
 
+    // --- DASH FIELDS (V2 Shift Applied) ---
+
     // Position (world-space)
-    positionX: buf.readFloatLE(232),
-    positionY: buf.readFloatLE(236),
-    positionZ: buf.readFloatLE(240),
+    positionX: buf.readFloatLE(232 + v2Offset),
+    positionY: buf.readFloatLE(236 + v2Offset),
+    positionZ: buf.readFloatLE(240 + v2Offset),
 
     // Speed (m/s → km/h)
-    speedMps: buf.readFloatLE(244),
-    speedKmh: Math.round(buf.readFloatLE(244) * 3.6),
+    speedMps: buf.readFloatLE(244 + v2Offset),
+    speedKmh: Math.round(buf.readFloatLE(244 + v2Offset) * 3.6),
 
     // Power & torque
-    power:  buf.readFloatLE(248),
-    torque: buf.readFloatLE(252),
+    power:  buf.readFloatLE(248 + v2Offset),
+    torque: buf.readFloatLE(252 + v2Offset),
 
     // Tire temps
-    tireTempFL: buf.readFloatLE(256),
-    tireTempFR: buf.readFloatLE(260),
-    tireTempRL: buf.readFloatLE(264),
-    tireTempRR: buf.readFloatLE(268),
+    tireTempFL: buf.readFloatLE(256 + v2Offset),
+    tireTempFR: buf.readFloatLE(260 + v2Offset),
+    tireTempRL: buf.readFloatLE(264 + v2Offset),
+    tireTempRR: buf.readFloatLE(268 + v2Offset),
 
     // Boost
-    boost: buf.readFloatLE(272),
+    boost: buf.readFloatLE(272 + v2Offset),
 
     // Fuel
-    fuel: buf.readFloatLE(276),
+    fuel: buf.readFloatLE(276 + v2Offset),
 
     // Distance traveled
-    distanceTraveled: buf.readFloatLE(280),
+    distanceTraveled: buf.readFloatLE(280 + v2Offset),
 
     // Best/Last lap times
-    bestLap:  buf.readFloatLE(284),
-    lastLap:  buf.readFloatLE(288),
-    currentLap: buf.readFloatLE(292),
-    currentRaceTime: buf.readFloatLE(296),
+    bestLap:  buf.readFloatLE(284 + v2Offset),
+    lastLap:  buf.readFloatLE(288 + v2Offset),
+    currentLap: buf.readFloatLE(292 + v2Offset),
+    currentRaceTime: buf.readFloatLE(296 + v2Offset),
 
     // Lap info
-    lapNumber:  buf.readUInt16LE(300),
-    racePosition: buf.readUInt8(302),
+    lapNumber:  buf.readUInt16LE(300 + v2Offset),
+    racePosition: buf.readUInt8(302 + v2Offset),
 
     // Throttle / Brake / Clutch / Handbrake / Gear / Steer
-    accel:     buf.readUInt8(303),
-    brake:     buf.readUInt8(304),
-    clutch:    buf.readUInt8(305),
-    handbrake: buf.readUInt8(306),
-    gear:      buf.readUInt8(307),
-    steer:     buf.readInt8(308),
+    accel:     buf.readUInt8(303 + v2Offset),
+    brake:     buf.readUInt8(304 + v2Offset),
+    clutch:    buf.readUInt8(305 + v2Offset),
+    handbrake: buf.readUInt8(306 + v2Offset),
+    gear:      buf.readUInt8(307 + v2Offset),
+    steer:     buf.readInt8(308 + v2Offset),
 
     // Normalized driving line
-    normalizedDrivingLine:   buf.readInt8(309),
-    normalizedAIBrakeDifference: buf.readInt8(310),
+    normalizedDrivingLine:   buf.readInt8(309 + v2Offset),
+    normalizedAIBrakeDifference: buf.readInt8(310 + v2Offset),
   };
 }
 

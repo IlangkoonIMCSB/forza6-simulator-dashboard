@@ -152,7 +152,6 @@ export default function App() {
     }
 
     const socket = io(serverUrl, {
-      transports: ['websocket'],
       reconnectionAttempts: Infinity,
       reconnectionDelay: 1000,
     });
